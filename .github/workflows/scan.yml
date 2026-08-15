@@ -16,7 +16,8 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.PAT_TOKEN }}  # ← USE PAT
+          token: ${{ secrets.PAT_TOKEN }}
+          fetch-depth: 0
 
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
@@ -29,7 +30,7 @@ jobs:
       - name: 🚀 Run scanner
         run: node server_scanner.js
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # ← USE PAT
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           ROBLOX_COOKIE: ${{ secrets.ROBLOX_COOKIE }}
 
       - name: 📤 Commit and push
@@ -39,3 +40,4 @@ jobs:
           file_pattern: "hopper.lua"
           commit_user_name: "lankpank"
           commit_user_email: "lankpank@users.noreply.github.com"
+          push_options: '--force'
