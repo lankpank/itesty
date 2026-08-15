@@ -1,0 +1,41 @@
+name: Run Server Scanner
+
+on:
+  # Run every 2 minutes
+  schedule:
+    - cron: '*/2 * * * *'
+  # Allow manual trigger from Actions tab
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Checkout your repository code
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js environment
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 3. Install dependencies
+      - name: 📦 Install dependencies
+        run: npm install
+
+      # 4. Run the scanner
+      - name: 🚀 Run scanner
+        run: node server_scanner.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ROBLOX_COOKIE: ${{ secrets.ROBLOX_COOKIE }}
+
+      # 5. Commit and push changes
+      - name: 📤 Commit and push
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "🤖 Auto-update server list [skip ci]"
+          file_pattern: "hopper.lua"
