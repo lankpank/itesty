@@ -5,10 +5,8 @@ on:
     - cron: '*/2 * * * *'
   workflow_dispatch:
 
-# 🔧 ADD THESE PERMISSIONS
 permissions:
   contents: write
-  actions: read
 
 jobs:
   scan:
@@ -18,7 +16,7 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}  # ← USE PAT
 
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
@@ -31,7 +29,7 @@ jobs:
       - name: 🚀 Run scanner
         run: node server_scanner.js
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # ← USE PAT
           ROBLOX_COOKIE: ${{ secrets.ROBLOX_COOKIE }}
 
       - name: 📤 Commit and push
@@ -39,6 +37,5 @@ jobs:
         with:
           commit_message: "🤖 Auto-update server list [skip ci]"
           file_pattern: "hopper.lua"
-          commit_user_name: "github-actions[bot]"
-          commit_user_email: "41898282+github-actions[bot]@users.noreply.github.com"
-          commit_author: "lankpank <lankpank@users.noreply.github.com>"
+          commit_user_name: "lankpank"
+          commit_user_email: "lankpank@users.noreply.github.com"
