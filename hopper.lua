@@ -4,6 +4,7 @@ task.wait(30)  -- Wait for game to fully load
 local HttpService = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local localUsername = player.Name
@@ -11,11 +12,13 @@ local localUsername = player.Name
 -- ============ CONFIGURATION ============
 local ACCOUNT_LABEL = "HopperBot"
 local MAX_PLAYER_COUNT = 11
-local RIFT_NAME = "overlord-rift"
+local RIFT_NAME = "nightmare-egg"
 local RIFT_PATH = workspace.Rendered.Rifts
 local RIFT_CHECK_DELAY = 1
 local HOP_COOLDOWN = 10
 local MAX_RETRY_ATTEMPTS = 10  -- How many servers to try before giving up
+local AUTO_TELEPORT_TO_RIFT = true  -- Set to true to auto-teleport to rift when found
+local TELEPORT_DELAY = 2  -- Seconds to wait before teleporting to rift
 
 -- ============ PING CONFIGURATION ============
 local PING_EVERYONE = true  -- Set to true to ping @everyone when rift is found
@@ -26,172 +29,164 @@ local w_notify = "https://discord.com/api/webhooks/1497653143981396051/y64QfolU0
 
 -- ============ SERVER LIST (Auto-updated) ============
 local SERVER_LIST = {
-        "1e657ae0-ac85-468d-b378-d1f07f2cb8ed",
-        "a9eee6e7-8a05-4d7b-b984-ff5d28c0f4f7",
-        "5b8bb393-8e23-4881-9146-9629cbd52118",
         "bf714821-0858-43df-9ebd-fd4da4ba8862",
-        "fc2099d2-3d03-4478-b30a-1fdde830b1d2",
-        "f9852c42-d6fc-48ac-9de8-49098389b0db",
-        "f5e862d0-2dac-4086-b038-e49d378e9b1c",
-        "c3aa2557-220d-472a-8126-164d349475bc",
-        "12cb133c-bd66-43d6-9817-edd9dbb533b2",
-        "5d549939-c36a-4a15-b773-7f0dfcf6158d",
-        "98f71f51-2542-4234-b7f4-b5976068fe40",
-        "f57ff41e-31b3-475e-8ed4-7ff374d847fa",
-        "dca13098-40b1-4a70-bdc4-8178f97efdac",
-        "936d0cac-07e1-4968-befe-2ebc185f0e30",
         "5d6463bd-e275-4ac8-a264-0f3830179d58",
-        "8c0817bf-bb50-44d8-92dc-20b9ec03c8cf",
-        "22d12981-a256-496e-b2e7-77d694bc0aee",
-        "b81e4340-1d99-4088-b61b-fc7e6eff0853",
-        "b5936253-3320-49ca-828a-b4b6f0f5a352",
-        "9d81b3ba-5196-4264-a04c-d666f4bd1c82",
-        "79f78d07-0078-400b-860b-1be805c641f2",
-        "ee851570-0714-41f0-bf91-8203ddcc5343",
-        "31696358-7f5e-4960-be40-9f8a9a1cdc51",
-        "2f575aec-bfb5-42d6-b182-f4e89d1883d2",
-        "bde5410b-b6ce-400c-bffd-c726b5c86bf8",
-        "04c78215-96b7-4646-b660-d350c1352b59",
-        "5ea35beb-7b27-43aa-af59-df54fde74d78",
-        "dda28dbb-2c31-4ad8-89b0-7350dfc8fdd6",
-        "d49c7acf-7940-4a00-95f5-1c71b6bf88a6",
-        "12440ac0-2ed2-4880-8d18-840bb81f07a0",
-        "4cb71cef-b291-4c24-ac56-ada87454df18",
-        "1c078902-0b6f-491b-915e-98270fd8ad2e",
-        "d7e82540-fb00-4031-a46b-8b2769a7439b",
-        "e96fc9f6-7521-46a0-b578-e6d263b8b8dc",
-        "ca9bb270-4c65-4ddb-8217-75a06c9f7f2e",
-        "4c74ded1-18a5-4340-af6c-18495fefed85",
-        "a88cb15d-add9-441e-921a-0893a38b0306",
-        "3d0fb13b-b10f-4129-b454-88949aad8a0c",
-        "c180b859-2e11-42b0-b315-8fdde54036d1",
-        "6fefb891-9794-42eb-a78e-cfc1151f021a",
-        "a80adaf9-96d0-4b37-9562-10932be45be9",
-        "098bed69-dc65-488d-8374-b1f6a8e2c880",
-        "b188ff00-7cfb-48d3-a7dc-aa4b07bbb23e",
-        "9356a6ad-a2d2-4969-90cc-f92cc124a78a",
-        "d0a9f2a2-2797-4de4-bedf-5a27e7cb1558",
-        "68e3632c-3b41-4d02-b224-28c6edb10a04",
-        "582bd67e-ba4b-4371-aca2-6bfeefeb5e77",
-        "54dd16bd-f6d6-48dc-a81b-bc46e1b0d7a9",
-        "156ef5fc-0a30-4ef4-8102-2a8685c9053c",
-        "68eccbab-d86a-4dd9-8000-b2534c4658d4",
-        "b11af74f-afde-4095-bb70-687fb7d0653c",
-        "a9f25543-4ff3-4365-91f2-c02da7d0db05",
-        "7ff9a5b8-d0a1-4160-a169-1e8c2022a023",
-        "6445b58c-a773-4107-a784-1e4676db67a4",
-        "01cf8320-eee0-4adc-b34b-db8035fb2f23",
-        "7b86e70a-c8e0-46c6-a810-cbd9ba580e8c",
-        "a48bbf6e-c9fd-4432-9183-d095ce0f95b5",
-        "1d289d56-afd5-4a07-81e5-870b88672c97",
-        "59ec762e-0073-4636-ab9d-f6453022cb26",
-        "990e64f8-b56a-4968-b4bf-db20d85a3c85",
-        "be9c341b-07c2-4ca1-8839-f10c6b0a096e",
-        "444f5401-a82f-4b6b-bb8c-1714256e2ff0",
-        "1497b168-3acf-45e8-8138-924f2aae5323",
-        "16575443-0aea-4295-a083-deddaad58e01",
-        "4b9e2d98-b7dc-4b94-bcee-bfec94f4c9b8",
-        "82f9fd0f-bf5f-4990-8a13-e7ab49d235bf",
-        "4bf8810f-535e-4cea-80fa-8470b8636a53",
-        "bc75dec8-a33f-42ab-81c4-30821b2be1f8",
-        "8811e88d-82e4-4a69-8f65-7616bc02e30f",
-        "45e9333b-2d61-4c2b-809b-0a437783bd39",
-        "77ec5433-c302-46ee-b8fd-33b1f51437cf",
-        "0cde7c07-408c-4511-95f5-ee8a94671481",
-        "89c6a7fb-6df6-4524-88d2-12eddff00bf1",
-        "4dc27090-230d-40e9-8bfa-09919637f508",
-        "a32c855c-068a-4a78-a751-d1d9dc1d10b0",
-        "553382ee-7fb4-46d0-8e5d-69227ac75798",
-        "d3bc0155-c61e-483c-ab70-d11872fe65de",
-        "2eb83174-d0cb-482b-9dd8-02d0655e9dbb",
-        "c738cebe-11d1-4f08-a921-29753cd14524",
-        "cd789bdc-7483-464b-8565-8a8898f34f4a",
-        "0b03ab7d-91bf-44af-87b0-58374687dc70",
-        "74397ef8-059d-41f2-8022-7373e24d8ced",
-        "c56d3915-88f5-4071-b9c4-28cd685f7918",
-        "c82a2094-bbda-4f61-9f77-022328779e72",
-        "4dd39641-4f7e-4551-9770-e695e6a4f533",
-        "a02d5c94-f995-46bd-a02a-d888c61c413c",
-        "b621bdaf-3e6f-47a8-accc-2792b43d2a0a",
-        "91553f32-2804-40a4-bba7-415def469ab2",
-        "fb1658fa-ef2a-4a19-af6d-d271e1b1a95b",
-        "e1abb39c-534d-41ab-a032-6c7fb83537f0",
-        "58096eba-7bce-42e2-bfe7-0305991c7f7f",
-        "fb1658fa-ef2a-4a19-af6d-d271e1b1a95b",
-        "e1abb39c-534d-41ab-a032-6c7fb83537f0",
-        "58096eba-7bce-42e2-bfe7-0305991c7f7f",
-        "49441132-1d77-4d6a-8d0b-c6c6c28a5394",
-        "6d15d728-af5e-43f3-bdf2-0d2dbdd7e5e0",
-        "cee604b5-48d2-42f6-b94f-ae70f7a2a211",
-        "0cb74f02-9bd7-4e31-bd1a-b60e49335e3f",
-        "11620861-634b-41ee-8ae3-4da3a8430885",
-        "7a53eb6d-a4fd-4677-83f9-79b9773a3a93",
-        "775253c9-4413-4bea-aa63-84894ac1b033",
-        "107b187b-856a-4a48-974d-2d7862241c02",
-        "36aa1403-74e3-4504-83e9-cf817804b3d1",
-        "b98ac0b5-88e6-4190-af68-1f2fde7b7af8",
-        "450c35c7-99e6-4b13-a044-46810bf869da",
-        "e021f074-179a-418f-b0c9-003e223785d7",
-        "14cdf152-2c38-430e-b90b-1d5775227c7c",
-        "24ea02f3-a205-4fb1-89e3-0892e6aa9b3f",
-        "8e6896d5-5d97-4428-a3a2-0b05ba52e145",
-        "3b4740ae-9d8c-46b8-bd4b-5afaf07a89f7",
-        "8295f947-0739-4983-86c8-d1e46d7b7025",
-        "9e4516a4-a8ec-44f9-8ace-ade816e787a9",
-        "5de424c5-a2d3-4323-8e45-3afed6031ea0",
-        "4de501d7-7eb7-4a6e-82cc-1703b81f5687",
-        "67de99ef-6a1e-4c6f-9675-6e2876328c65",
-        "f247cb87-8e91-4853-9d73-0a3444030bc9",
-        "460a5e64-50c7-4387-8d20-a5b4abf49ae8",
-        "6d24a182-1cd1-4625-ae28-c81c02d10e12",
-        "7929a04f-a161-4370-b26b-d7f03a234cca",
-        "ccf30676-7819-45a7-a61b-ac2777fd8b2a",
-        "67fde8b9-23f3-480c-ace8-2c35453d646e",
-        "27dde5dd-c88e-4ec5-9e16-948fec1c933c",
-        "5e7ad112-852a-4250-bcfe-f22b1a1b9c2a",
-        "31b7820d-ba75-42ff-b892-5777f0cc8756",
-        "a99d6e45-f2d7-4c19-8b6d-21bfc447733e",
-        "1291f9f8-bdbe-4c71-898c-e6252815f4af",
-        "0548ce19-977b-44e9-bcc1-04d7e31e3a35",
-        "68ad0ac1-a20d-4deb-a611-3abbcd7107c8",
-        "36816829-91f9-4618-84c5-f71f45b84a94",
-        "09026782-6904-4120-a60d-36186bcaa7e5",
-        "a9696202-e98c-47b2-8009-1c11a7bc4d3c",
+        "f4e88fab-3c13-4f33-b9b2-857d88a2d8f2",
         "b91c0207-d8b9-498b-94d4-4ae1415b2573",
-        "b88a04c2-a179-4f31-afc0-5a205f110c8b",
-        "90af7cd6-eeed-43b4-8778-4df39a2440a7",
-        "609c1ae3-78ad-4bf1-9d10-2ef50f462c66",
-        "21e54fed-15e7-4376-95d4-b27c2b890a48",
-        "a20de517-6c50-434e-8c26-7fbf8cb8a676",
-        "4052f169-dd13-4cf6-8cec-c5c8a7795cd4",
+        "f57ff41e-31b3-475e-8ed4-7ff374d847fa",
+        "156ef5fc-0a30-4ef4-8102-2a8685c9053c",
+        "b98ac0b5-88e6-4190-af68-1f2fde7b7af8",
+        "d7e82540-fb00-4031-a46b-8b2769a7439b",
+        "83e798bf-7fc3-41bb-8cc2-aafaf756e1d3",
+        "7ff9a5b8-d0a1-4160-a169-1e8c2022a023",
+        "a99d6e45-f2d7-4c19-8b6d-21bfc447733e",
+        "bde5410b-b6ce-400c-bffd-c726b5c86bf8",
+        "22d12981-a256-496e-b2e7-77d694bc0aee",
+        "cee604b5-48d2-42f6-b94f-ae70f7a2a211",
+        "dca0e590-e4eb-41c1-a4e5-357f4cd8bfeb",
+        "460a5e64-50c7-4387-8d20-a5b4abf49ae8",
+        "daabf1c9-0ea3-4fcc-a917-c9dcfc642fcf",
+        "a0a12df3-4c54-4809-b2d3-4a09ab0621b3",
+        "68ad0ac1-a20d-4deb-a611-3abbcd7107c8",
+        "11620861-634b-41ee-8ae3-4da3a8430885",
+        "b11af74f-afde-4095-bb70-687fb7d0653c",
+        "4bf8810f-535e-4cea-80fa-8470b8636a53",
+        "a02d5c94-f995-46bd-a02a-d888c61c413c",
+        "0b49175b-4c4d-4dbc-8f00-3ab7f610938b",
+        "e1abb39c-534d-41ab-a032-6c7fb83537f0",
+        "dda28dbb-2c31-4ad8-89b0-7350dfc8fdd6",
+        "bde93060-9983-466d-929b-03869aa7f4d1",
+        "ccf30676-7819-45a7-a61b-ac2777fd8b2a",
         "a5b35da6-7b6a-4edf-9315-5ac041e95dbf",
-        "81ab7a0a-89d4-4ae2-966f-176d4b9e2a65",
-        "983a1fab-5e99-4c19-a3ff-cc41bbfd375a",
-        "4f86e354-61a3-4cbb-ae54-d47e726be5ea",
-        "93ae2ace-3c35-4161-abc0-7cc54e7d23f3",
-        "5dc21757-28e8-4ddc-bfa1-220af7195cbc",
-        "cc483a4a-0230-4bb9-8eaf-efc4a1b279b0",
+        "62eaa717-e3f3-4ffa-8b87-3bc4ecf6d8d8",
+        "c274d522-f2cf-4b02-bd2d-de12c9efeed9",
+        "df3ca884-8e51-469b-ac29-fd5f87558016",
+        "0a66b29b-9099-42d0-b3c2-3636715742c5",
+        "f4d92289-ec26-4adb-b5ae-70f457bc9ebb",
+        "f5aa98f6-3ce2-4e38-be9b-0281619c3c72",
+        "e021f074-179a-418f-b0c9-003e223785d7",
+        "4dc27090-230d-40e9-8bfa-09919637f508",
+        "3245830d-8c2f-4ef7-9ff4-5541f3798dbf",
+        "da9c7383-c750-4b4f-917b-50c0b0835363",
+        "0548ce19-977b-44e9-bcc1-04d7e31e3a35",
+        "c3a268cf-758e-42ea-831c-21b7403aeadc",
+        "83c46d15-be28-4d55-803b-f488683844d7",
+        "08ea6467-7bd7-49c6-883e-2422de8a8602",
+        "319f469d-7232-45c0-9c15-02618b05b830",
+        "c3aa2557-220d-472a-8126-164d349475bc",
+        "943b5062-732b-45b9-9e85-d1fae75c970e",
+        "24ea02f3-a205-4fb1-89e3-0892e6aa9b3f",
+        "f247cb87-8e91-4853-9d73-0a3444030bc9",
+        "1a39afce-298f-4fc4-90ac-c589cb67b44a",
+        "e96fc9f6-7521-46a0-b578-e6d263b8b8dc",
+        "6d24a182-1cd1-4625-ae28-c81c02d10e12",
+        "2f51d2f7-7f5f-469e-8850-c869874d4831",
+        "c738cebe-11d1-4f08-a921-29753cd14524",
+        "16575443-0aea-4295-a083-deddaad58e01",
+        "eed2e947-b75b-4c20-9090-7c2699cb676a",
+        "0cde7c07-408c-4511-95f5-ee8a94671481",
+        "74cc553b-b208-496e-a235-00122eeb21f7",
+        "c20995cf-8c33-4439-beb0-6fd298aa33a9",
+        "23de996f-c5f5-4285-8d1f-28f4ce09d473",
+        "609c1ae3-78ad-4bf1-9d10-2ef50f462c66",
+        "1d4aab93-6189-4c94-b20a-fdb514fc859b",
+        "4c74ded1-18a5-4340-af6c-18495fefed85",
+        "2efe4fe4-4262-46c7-af21-f3e319cd91b0",
+        "09026782-6904-4120-a60d-36186bcaa7e5",
+        "3e6ebb66-581a-4bc3-a29d-889dbd35c642",
+        "45ce2e54-1ae6-4bd7-b98b-06f03dee196f",
+        "ccb3b44a-cc30-4252-9b80-17745c79cc6f",
+        "098bed69-dc65-488d-8374-b1f6a8e2c880",
+        "cf465955-35b4-4226-a31c-50d877ad0b54",
+        "7e7f59a0-87c9-4718-9645-ca2713891f2a",
+        "5746e449-e015-4bd2-8429-e19fd3f9fea2",
+        "c207e1e7-2df2-4c34-8747-3484f00f5e24",
+        "8c0817bf-bb50-44d8-92dc-20b9ec03c8cf",
+        "662a6b7b-156c-4ed7-9009-a33fb8fba2f0",
+        "12cb133c-bd66-43d6-9817-edd9dbb533b2",
+        "8811e88d-82e4-4a69-8f65-7616bc02e30f",
+        "8f3d52be-4eec-4198-b539-89c78f8d513b",
+        "8f9a351a-aa5e-4bb5-94de-01c5d645fbef",
+        "c52c7e3f-4f17-4e88-af10-5897d3ade294",
+        "4474e803-b6b5-4473-a86f-0256c978e8e6",
+        "a20de517-6c50-434e-8c26-7fbf8cb8a676",
+        "b88a04c2-a179-4f31-afc0-5a205f110c8b",
+        "85ff7b2b-dfab-4228-b974-154dcd35fcab",
+        "8b6fdde3-5a8a-47c2-a972-6877b1dae2e0",
+        "237258f8-98a6-4009-af29-7fa753e02713",
+        "990e64f8-b56a-4968-b4bf-db20d85a3c85",
+        "cd789bdc-7483-464b-8565-8a8898f34f4a",
+        "9356a6ad-a2d2-4969-90cc-f92cc124a78a",
+        "6fefb891-9794-42eb-a78e-cfc1151f021a",
+        "0b03ab7d-91bf-44af-87b0-58374687dc70",
+        "3b6d4153-d763-4842-9099-604b70c8d7be",
+        "c56d3915-88f5-4071-b9c4-28cd685f7918",
+        "9356a6ad-a2d2-4969-90cc-f92cc124a78a",
+        "6fefb891-9794-42eb-a78e-cfc1151f021a",
+        "0b03ab7d-91bf-44af-87b0-58374687dc70",
+        "3b6d4153-d763-4842-9099-604b70c8d7be",
+        "c56d3915-88f5-4071-b9c4-28cd685f7918",
+        "b35f3640-286e-4967-bc8c-b543c21e0e74",
+        "dca13098-40b1-4a70-bdc4-8178f97efdac",
+        "4380ca0a-41e4-4eea-8559-a3c87451fc0b",
+        "afb54dbc-330d-462e-9481-7f6495f1a5e6",
+        "a9696202-e98c-47b2-8009-1c11a7bc4d3c",
+        "ee851570-0714-41f0-bf91-8203ddcc5343",
+        "ac8bd837-817a-4c0a-859e-37dc939a4e22",
+        "12440ac0-2ed2-4880-8d18-840bb81f07a0",
+        "737aa185-64ba-4e7c-b794-e18859a38e12",
+        "a88cb15d-add9-441e-921a-0893a38b0306",
+        "8006e1dd-df56-4a36-a1cc-2973516fd352",
+        "04c78215-96b7-4646-b660-d350c1352b59",
+        "5836fd20-a1d7-42e0-827d-bb9a3d317e7a",
+        "15606906-3b63-4c83-92e1-531538285aaa",
+        "1c078902-0b6f-491b-915e-98270fd8ad2e",
+        "640141a8-8eb4-48e7-8ba7-35956b69b42b",
+        "f2875138-18fe-4a57-af5b-c0c042988723",
+        "62b981ff-f0e6-43ce-a69c-1b58836aea23",
+        "0cde7c07-408c-4511-95f5-ee8a94671481",
+        "7ce531d4-06fa-4f61-acae-38c1806a260e",
+        "8295f947-0739-4983-86c8-d1e46d7b7025",
+        "98f71f51-2542-4234-b7f4-b5976068fe40",
+        "52661060-85a1-431a-b2d0-2f59f13b07c4",
+        "a48bbf6e-c9fd-4432-9183-d095ce0f95b5",
         "4e0241ce-96fa-4ccf-b806-dbb5c15c2648",
-        "88e05080-c7f2-4276-9c46-15223d91a872",
-        "f6c5b3b5-e6fb-4d85-abcd-f70249743051",
-        "4bc447fd-eaf1-4543-a5c5-4e1cfed11dfe",
-        "058359cc-348b-4565-b168-83a5e34a52f3",
-        "39973e1a-0097-49e9-97f4-ea84ee89f625",
+        "6a2a8d37-d9cc-4e38-9293-45b8086cbcb0",
+        "2eb83174-d0cb-482b-9dd8-02d0655e9dbb",
+        "4dd39641-4f7e-4551-9770-e695e6a4f533",
+        "750da7aa-02b7-45fe-9900-b9f16aebc490",
+        "df8ec079-57d2-4af4-991f-5b2df28abfbc",
+        "242d759d-ce71-4c45-ac9f-90c12ca9f071",
+        "d971a946-e841-47eb-87fa-01ad43d55b28",
         "005bccbc-c25c-4b17-a299-375f91961bf0",
-        "8ea8cf0a-993c-4cb6-827a-9e1efa232a4f",
-        "73984f19-2ea6-491e-9078-c57a872937f9",
-        "325e7696-e0fb-4c65-ae23-2999e98151b6",
-        "411120b4-104b-4a03-ae40-651ddabc5851",
-        "43563649-b5bc-4ba7-a67a-5714a3a31857",
-        "eb2609ae-b125-40a9-b14b-a25596ec574a",
-        "dd182e43-c0d3-4b82-8bfb-229188e56c1d",
-        "71162a88-545e-4525-95c5-5559492dc515",
-        "2d0256a4-3725-4253-b42e-287276ccbbb1"
+        "af31220e-31dd-4f76-98f7-06dae9bb7c59",
+        "3da12df6-4284-4d83-bb31-e2297c6e9375",
+        "9e4516a4-a8ec-44f9-8ace-ade816e787a9",
+        "ea4f5a13-48b5-4de7-b935-3e86a338c054",
+        "5bdb3eef-3203-419d-af05-ec04f780878f",
+        "3d0d87d6-5e0b-415b-8fe9-7f387f9fe1a8",
+        "368d2382-a1b3-4def-91f0-0a5c6fca8ad1",
+        "b8c3e7e2-a7ea-4356-a258-4ff5575a8899",
+        "bee6cc3b-5545-437a-af73-be1c6d9d8097",
+        "fa1a1142-ea47-493e-af88-979dfa4eeba1",
+        "55df9718-4d91-4461-ba99-84a0fddb1500",
+        "36aa1403-74e3-4504-83e9-cf817804b3d1",
+        "1d43a658-ae05-4e0e-8b6b-75797a5f1c78",
+        "d656e960-d7d2-4568-8b02-fbe6dde3e5dd",
+        "d49c7acf-7940-4a00-95f5-1c71b6bf88a6",
+        "c82a2094-bbda-4f61-9f77-022328779e72",
+        "adc5ce93-741a-49ca-97a4-a8d3d66536a5",
+        "775253c9-4413-4bea-aa63-84894ac1b033",
+        "45faff78-6a94-432b-9f91-44fc3ffa8577",
+        "28174861-2f84-4c46-a55c-3c252b0b47ba",
+        "5eccc8c6-903d-4719-8b54-ce4751cdde64",
+        "4c8c17cc-02e6-4009-a78b-d693015e9c2c"
     }
 
 -- ============ STATE ============
 local isHopping = false
 local riftActive = false
+local hasTeleportedToRift = false
 
 -- ============ WEBHOOK ============
 local function sendWebhook(targetUrl, payload)
@@ -214,11 +209,97 @@ local function isRiftValid()
     return rift and rift:FindFirstChild("Display") and rift.Display:IsA("BasePart") and rift or nil
 end
 
+-- ============ AUTO TELEPORT TO RIFT ============
+local function teleportToRift()
+    local riftInstance = isRiftValid()
+    if not riftInstance then 
+        print("❌ No rift found to teleport to!")
+        return false 
+    end
+    
+    if hasTeleportedToRift then
+        print("⏳ Already teleported to this rift!")
+        return true
+    end
+    
+    print("🚀 Attempting to teleport to rift...")
+    
+    -- Get the character
+    local character = player.Character
+    if not character or not character.Parent then
+        print("❌ Character not found! Waiting for respawn...")
+        task.wait(2)
+        character = player.Character
+        if not character or not character.Parent then
+            print("❌ Still no character! Cannot teleport.")
+            return false
+        end
+    end
+    
+    -- Get the humanoid root part or primary part
+    local rootPart = character:FindFirstChild("HumanoidRootPart") or character.PrimaryPart
+    if not rootPart then
+        print("❌ No root part found!")
+        return false
+    end
+    
+    -- Get rift position (slightly above the display for landing)
+    local riftPosition = riftInstance.Display.Position + Vector3.new(0, 5, 0)
+    
+    -- Check if we're already at the rift
+    local distance = (rootPart.Position - riftPosition).Magnitude
+    if distance < 20 then
+        print("✅ Already near the rift!")
+        hasTeleportedToRift = true
+        return true
+    end
+    
+    -- Teleport using CFrame
+    local success = pcall(function()
+        rootPart.CFrame = CFrame.new(riftPosition)
+        print("✅ Teleported to rift at height: " .. math.floor(riftPosition.Y) .. " meters!")
+        hasTeleportedToRift = true
+        
+        -- Send confirmation webhook
+        if w_notify ~= "" then
+            local message = string.format(
+                "%s | User **%s** teleported to rift!\n> **Height:** %d meters",
+                ACCOUNT_LABEL,
+                localUsername,
+                math.floor(riftPosition.Y)
+            )
+            sendWebhook(w_notify, { content = message })
+        end
+    end)
+    
+    if not success then
+        print("❌ Failed to teleport to rift! Trying alternative method...")
+        -- Alternative: Use the character's Humanoid to move
+        local humanoid = character:FindFirstChild("Humanoid")
+        if humanoid then
+            pcall(function()
+                humanoid:MoveTo(riftPosition)
+                print("✅ Using MoveTo to approach rift!")
+            end)
+        end
+        return false
+    end
+    
+    return true
+end
+
 local function checkAndReportRift()
     local riftInstance = isRiftValid()
     if not riftInstance then return end
     
     print("🎯 RIFT FOUND!")
+    
+    -- Auto teleport to rift if enabled
+    if AUTO_TELEPORT_TO_RIFT then
+        print("⏳ Waiting " .. TELEPORT_DELAY .. " seconds before teleporting...")
+        task.wait(TELEPORT_DELAY)
+        teleportToRift()
+    end
     
     if w_main ~= "" then
         -- Get rift info
@@ -268,11 +349,18 @@ local function checkAndReportRift()
             pingMessage = "@everyone **RIFT FOUND!** "
         end
         
+        -- Add teleport status to fields
+        local teleportStatus = "Not teleported"
+        if hasTeleportedToRift then
+            teleportStatus = "✅ Teleported!"
+        end
+        
         -- ============ BUILD EMBED FIELDS ============
         local embedFields = {
             { name = "Found By", value = localUsername .. " (" .. ACCOUNT_LABEL .. ")", inline = false },
             { name = "Rift Height", value = tostring(height) .. " meters", inline = false },
-            { name = "Players", value = string.format("%d/12", playerCount), inline = false }
+            { name = "Players", value = string.format("%d/12", playerCount), inline = false },
+            { name = "Auto-Teleport Status", value = teleportStatus, inline = false }
         }
         
         -- Add Luck if available
@@ -421,12 +509,18 @@ if PING_EVERYONE then
 else
     print("🔕 @everyone ping is DISABLED")
 end
+if AUTO_TELEPORT_TO_RIFT then
+    print("🚀 Auto-teleport to rift is ENABLED (delay: " .. TELEPORT_DELAY .. "s)")
+else
+    print("🚫 Auto-teleport to rift is DISABLED")
+end
 print("⏳ Waiting for rift detection...")
 
 while true do
     if isRiftValid() then
         if not riftActive then
             riftActive = true
+            hasTeleportedToRift = false  -- Reset for new rift
             print("🎯 RIFT FOUND! Stopping hops.")
             checkAndReportRift()
         else
@@ -435,6 +529,7 @@ while true do
     else
         if riftActive then
             riftActive = false
+            hasTeleportedToRift = false
             print("❌ Rift ended! Resuming hops.")
         end
         
