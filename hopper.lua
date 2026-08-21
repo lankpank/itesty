@@ -1,4 +1,4 @@
-task.wait(30)  -- Wait for game to fully load
+task.wait(90)  -- Wait for game to fully load
 
 -- Loaded from GitHub: lankpank/itesty
 local HttpService = game:GetService("HttpService")
@@ -12,13 +12,19 @@ local localUsername = player.Name
 -- ============ CONFIGURATION ============
 local ACCOUNT_LABEL = "HopperBot"
 local MAX_PLAYER_COUNT = 11
-local RIFT_NAME = "overlord-rift"
+local RIFT_NAME = "shadow-rift"  -- Change to "dark-rift" or whatever rift you want
 local RIFT_PATH = workspace.Rendered.Rifts
 local RIFT_CHECK_DELAY = 1
 local HOP_COOLDOWN = 10
 local MAX_RETRY_ATTEMPTS = 10  -- How many servers to try before giving up
 local AUTO_TELEPORT_TO_RIFT = true  -- Set to true to auto-teleport to rift when found
 local TELEPORT_DELAY = 2  -- Seconds to wait before teleporting to rift
+
+-- ============ EGG SCAN CONFIGURATION ============
+local SCAN_FOR_EGG = true  -- Set to true to scan and teleport to egg after rift
+local TARGET_EGG_NAME = "Dark Rift Egg"  -- Change to the egg you want to teleport to
+local EGG_SCAN_DELAY = 0.5  -- Seconds to wait after rift teleport before scanning for egg
+local TELEPORT_TO_EGG_DELAY = 1  -- Seconds to wait before teleporting to egg
 
 -- ============ PING CONFIGURATION ============
 local PING_EVERYONE = true  -- Set to true to ping @everyone when rift is found
@@ -29,151 +35,199 @@ local w_notify = "https://discord.com/api/webhooks/1497653143981396051/y64QfolU0
 
 -- ============ SERVER LIST (Auto-updated) ============
 local SERVER_LIST = {
-        "990e64f8-b56a-4968-b4bf-db20d85a3c85",
-        "8c770cfb-fe15-48f6-a2c9-ab0630948a01",
-        "c20995cf-8c33-4439-beb0-6fd298aa33a9",
-        "ac8bd837-817a-4c0a-859e-37dc939a4e22",
-        "cee604b5-48d2-42f6-b94f-ae70f7a2a211",
-        "98f71f51-2542-4234-b7f4-b5976068fe40",
-        "bc75dec8-a33f-42ab-81c4-30821b2be1f8",
-        "156ef5fc-0a30-4ef4-8102-2a8685c9053c",
-        "098bed69-dc65-488d-8374-b1f6a8e2c880",
-        "67de99ef-6a1e-4c6f-9675-6e2876328c65",
-        "c3aa2557-220d-472a-8126-164d349475bc",
-        "ea4f5a13-48b5-4de7-b935-3e86a338c054",
-        "55df9718-4d91-4461-ba99-84a0fddb1500",
-        "f58aa63a-857f-47aa-a328-0c2a416a077c",
-        "3d0d87d6-5e0b-415b-8fe9-7f387f9fe1a8",
-        "8ebecc3f-16a0-4bc4-bd3c-40e85abc65cc",
-        "7ce531d4-06fa-4f61-acae-38c1806a260e",
-        "49188300-d759-4a1d-b832-5b34d179eb81",
-        "afb54dbc-330d-462e-9481-7f6495f1a5e6",
-        "da9c7383-c750-4b4f-917b-50c0b0835363",
-        "ccb3b44a-cc30-4252-9b80-17745c79cc6f",
-        "4a3fe893-bf72-41b3-a395-783eb8de00bb",
-        "e1abb39c-534d-41ab-a032-6c7fb83537f0",
-        "4c74ded1-18a5-4340-af6c-18495fefed85",
-        "a99d6e45-f2d7-4c19-8b6d-21bfc447733e",
-        "11620861-634b-41ee-8ae3-4da3a8430885",
-        "24ea02f3-a205-4fb1-89e3-0892e6aa9b3f",
-        "005bccbc-c25c-4b17-a299-375f91961bf0",
-        "0a66b29b-9099-42d0-b3c2-3636715742c5",
-        "20d70d19-9b1f-4f44-b437-b7cf4ce6f925",
-        "86e3d408-7a9b-4ceb-b93a-3cb49619d0cb",
-        "2efe4fe4-4262-46c7-af21-f3e319cd91b0",
-        "daabf1c9-0ea3-4fcc-a917-c9dcfc642fcf",
-        "b91c0207-d8b9-498b-94d4-4ae1415b2573",
-        "cf465955-35b4-4226-a31c-50d877ad0b54",
-        "7e7f59a0-87c9-4718-9645-ca2713891f2a",
-        "5ecccd7e-5012-4174-8350-2dd22e8eecc5",
-        "750da7aa-02b7-45fe-9900-b9f16aebc490",
-        "c52c7e3f-4f17-4e88-af10-5897d3ade294",
-        "2460e686-13e5-4c08-96fe-c2f3ebcde4c3",
-        "a20de517-6c50-434e-8c26-7fbf8cb8a676",
-        "b11af74f-afde-4095-bb70-687fb7d0653c",
-        "8811e88d-82e4-4a69-8f65-7616bc02e30f",
-        "3e6ebb66-581a-4bc3-a29d-889dbd35c642",
-        "62eaa717-e3f3-4ffa-8b87-3bc4ecf6d8d8",
-        "f77e4b86-996a-474e-915f-3c4091e3eda5",
-        "5836fd20-a1d7-42e0-827d-bb9a3d317e7a",
-        "8e6c65df-c792-4a95-9e6a-4e3ed1bf9479",
-        "15606906-3b63-4c83-92e1-531538285aaa",
-        "737aa185-64ba-4e7c-b794-e18859a38e12",
-        "0b49175b-4c4d-4dbc-8f00-3ab7f610938b",
-        "dca0e590-e4eb-41c1-a4e5-357f4cd8bfeb",
-        "1c078902-0b6f-491b-915e-98270fd8ad2e",
-        "9f39b826-3791-4353-878b-7b9554502803",
-        "640141a8-8eb4-48e7-8ba7-35956b69b42b",
-        "04c78215-96b7-4646-b660-d350c1352b59",
-        "5c163e79-a699-45cb-a683-9f9028261603",
-        "943b5062-732b-45b9-9e85-d1fae75c970e",
-        "280acf7f-aeb9-44b2-8310-4f46b780f6d6",
-        "14dab30c-06eb-4f42-8844-40c3e1573c94",
-        "bee6cc3b-5545-437a-af73-be1c6d9d8097",
-        "b35f3640-286e-4967-bc8c-b543c21e0e74",
-        "0256130b-ac85-4a6c-814c-992e0b56028b",
-        "8f3d52be-4eec-4198-b539-89c78f8d513b",
-        "df3ca884-8e51-469b-ac29-fd5f87558016",
-        "f247cb87-8e91-4853-9d73-0a3444030bc9",
-        "1720c437-8bcf-40c1-8586-dee018d1639b",
-        "c3a268cf-758e-42ea-831c-21b7403aeadc",
-        "1acf005d-f629-48f3-8459-20f36ea2f4c1",
-        "d21232d3-b140-4040-bf28-bae3290e85c0",
-        "0cde7c07-408c-4511-95f5-ee8a94671481",
-        "bcde8ca4-4667-4972-b85d-7a6176137680",
-        "d971a946-e841-47eb-87fa-01ad43d55b28",
-        "f2875138-18fe-4a57-af5b-c0c042988723",
-        "b8c3e7e2-a7ea-4356-a258-4ff5575a8899",
-        "22d12981-a256-496e-b2e7-77d694bc0aee",
-        "0548ce19-977b-44e9-bcc1-04d7e31e3a35",
-        "b98ac0b5-88e6-4190-af68-1f2fde7b7af8",
-        "af31220e-31dd-4f76-98f7-06dae9bb7c59",
-        "e021f074-179a-418f-b0c9-003e223785d7",
-        "a9696202-e98c-47b2-8009-1c11a7bc4d3c",
-        "676d770d-28cf-44d1-b2fc-98d7ee06820c",
-        "8f9a351a-aa5e-4bb5-94de-01c5d645fbef",
-        "5964863a-9cbe-4e27-ac9c-77d2c319d52a",
-        "d656e960-d7d2-4568-8b02-fbe6dde3e5dd",
-        "d49c7acf-7940-4a00-95f5-1c71b6bf88a6",
-        "35d8d269-a3fa-4d80-9660-f0abd64b140b",
-        "1d43a658-ae05-4e0e-8b6b-75797a5f1c78",
-        "45faff78-6a94-432b-9f91-44fc3ffa8577",
-        "762ea2e7-744b-4530-87df-c8909aab102a",
-        "09026782-6904-4120-a60d-36186bcaa7e5",
-        "0548ce19-977b-44e9-bcc1-04d7e31e3a35",
-        "b98ac0b5-88e6-4190-af68-1f2fde7b7af8",
-        "af31220e-31dd-4f76-98f7-06dae9bb7c59",
-        "e021f074-179a-418f-b0c9-003e223785d7",
-        "a9696202-e98c-47b2-8009-1c11a7bc4d3c",
-        "676d770d-28cf-44d1-b2fc-98d7ee06820c",
-        "8f9a351a-aa5e-4bb5-94de-01c5d645fbef",
-        "5964863a-9cbe-4e27-ac9c-77d2c319d52a",
-        "d656e960-d7d2-4568-8b02-fbe6dde3e5dd",
-        "d49c7acf-7940-4a00-95f5-1c71b6bf88a6",
-        "35d8d269-a3fa-4d80-9660-f0abd64b140b",
-        "1d43a658-ae05-4e0e-8b6b-75797a5f1c78",
-        "45faff78-6a94-432b-9f91-44fc3ffa8577",
-        "762ea2e7-744b-4530-87df-c8909aab102a",
-        "09026782-6904-4120-a60d-36186bcaa7e5",
-        "237258f8-98a6-4009-af29-7fa753e02713",
-        "ee851570-0714-41f0-bf91-8203ddcc5343",
-        "cd789bdc-7483-464b-8565-8a8898f34f4a",
-        "4dd39641-4f7e-4551-9770-e695e6a4f533",
-        "c25b87a8-6ac4-4a59-ab96-1d7dcd741fa3",
-        "14dab30c-06eb-4f42-8844-40c3e1573c94",
-        "609c1ae3-78ad-4bf1-9d10-2ef50f462c66",
-        "1d4aab93-6189-4c94-b20a-fdb514fc859b",
-        "8b6fdde3-5a8a-47c2-a972-6877b1dae2e0",
-        "4e8f1096-3c63-439c-a7a0-6f8f438a038e",
-        "2eb83174-d0cb-482b-9dd8-02d0655e9dbb",
-        "433667ef-43a0-4da6-803d-97fdd583c70c",
-        "aef5fd02-0d44-4954-b696-6340d7be96d6",
-        "3da12df6-4284-4d83-bb31-e2297c6e9375",
-        "52661060-85a1-431a-b2d0-2f59f13b07c4",
-        "4bf8810f-535e-4cea-80fa-8470b8636a53",
-        "e6ec2162-8833-4799-bb39-5460cb2cae35",
-        "d1605ca6-8c12-4597-99c8-4853f5c8424e",
-        "5746e449-e015-4bd2-8429-e19fd3f9fea2",
-        "b25eb5e2-884c-4aa5-8065-2df0c91634cb",
-        "ec215ba7-85bd-49e4-8f1a-1704e77d9b18",
-        "05cb14db-381e-47ae-ba22-7626d20c8abf",
-        "bf714821-0858-43df-9ebd-fd4da4ba8862",
-        "0a84d77f-c2a4-43d8-bd08-794e1ff4909c",
-        "727397ff-3ca2-46d3-a28e-4016d1570765",
-        "0ebd97b7-949c-47b0-9225-66b46863584f",
-        "e63814cc-80e2-4e3d-b81e-18a3e9df9b11",
-        "12cb133c-bd66-43d6-9817-edd9dbb533b2",
-        "24655a38-46ad-4779-ae97-78a8cbef13df",
-        "74d8e8fc-be0b-41b1-98bd-330f7ee45aa1",
-        "05b86411-1339-4f8a-ba37-895f10d1a329",
-        "a88cb15d-add9-441e-921a-0893a38b0306",
-        "83c46d15-be28-4d55-803b-f488683844d7"
+        "9fb67dff-1336-4e5c-9053-527b2f8b7f20",
+        "3263da9d-0baf-4e75-9834-b3fe5b9493b7",
+        "07a4236c-7490-4683-ac2f-6805e4d1927e",
+        "17de3b59-15e7-43fc-8ca8-2add17f4d01b",
+        "eacea845-dce5-41a7-a559-57f6e038d4aa",
+        "f7fc72ed-a7df-494f-957e-1af69cb90d22",
+        "f7840e5b-0b4c-4994-a4f7-5e92032a1368",
+        "923f4dfd-f401-42d8-85d4-f473906d44e3",
+        "ebe524c2-bfb5-4afe-9de3-6818b28c82df",
+        "b691191e-883a-46ef-85ac-c0c5466839a1",
+        "83dd5659-433d-4f40-b754-16a38907f3a8",
+        "55286f17-0303-4bec-85e8-cc8b6fd69eaf",
+        "5b104000-60e1-4146-b841-33cbac6f9396",
+        "18b3f393-ac68-4794-bad0-4641f5af03de",
+        "9f0ed94c-9515-4f75-96aa-42f56a9c6e89",
+        "d3a11208-4e0d-4e15-8ac0-04864ed4c76c",
+        "7f3c938a-9815-472b-adf3-341f39825d72",
+        "f4332eea-fb4b-4dce-a82f-9862ab2956ef",
+        "c7d154e6-4aa3-45e1-b29c-d56a5945e839",
+        "79858c93-a171-4b4d-b6e0-8e60c2fa0080",
+        "a8a65703-f85e-4874-89aa-daef1eb7bc94",
+        "d39d4382-8c1d-4895-bb47-da73546d5138",
+        "c15e8828-b088-42ad-981f-408c9de5fa37",
+        "e9728f3a-30cf-4fe6-bd77-0fa0c6bc20af",
+        "9c9a57a9-e904-454d-aa12-a87cf6a94b33",
+        "0dbc5e2e-51b9-4e93-b9e8-a5138e3fad13",
+        "4c6228c8-e341-428c-9800-59f393770214",
+        "92e4ef60-4063-411f-9e37-a67d5846d45e",
+        "e0064d6d-b6b9-4ebc-9a49-db01a4c1a995",
+        "75b14f1a-842a-4f41-8b31-fe0a53c380c9",
+        "5726e8f5-bc8d-4239-bbd4-8f3afa18a15f",
+        "1c931f81-24ba-4d7f-b42d-266aab497033",
+        "c99e5357-9909-4dbb-b78b-ffa465d84eb8",
+        "cfb0cbf5-59c1-475f-a581-7f5e0a6eba95",
+        "8c783fe9-cfa2-49bb-925e-8a7fb0f3244c",
+        "55b1baec-09f0-41eb-b5a6-7af41f42d58d",
+        "1fdd4010-5703-42fc-bb35-fdc56e6175f4",
+        "dcd14dc7-7eea-464f-a00d-b8ffc5c1c63a",
+        "b6a0d48b-64a3-4ae7-8dc5-730d5638c7fd",
+        "5856d84e-a60f-4e24-8f68-7a62946dd3bf",
+        "4d41c8e7-c6ce-403c-ab31-d9c767dfed41",
+        "7f8b4e1e-7dca-4e20-96c9-f6da76107c8f",
+        "15ea386a-bdf8-4e20-883b-82ab98b8a270",
+        "6ae6e6e3-29c0-4f79-97e6-b160c9549126",
+        "e34d87ce-7a94-4b2c-b445-f7dea74b4fb5",
+        "c0cf59f8-054e-417f-ab9c-3d28a94ff1d5",
+        "a47e1b11-af08-4350-a2d8-cdcd73e2548d",
+        "fd60f008-bfad-4c35-a30e-5b05d23694ca",
+        "4bc6dd8e-3df0-47ed-a210-c76a760aa12d",
+        "850cb166-038a-4f13-92d6-a011e3efc0a9",
+        "108f66a8-2211-45c8-9e1f-2a639e1c6e4c",
+        "ccda4eb8-72f6-48c2-96c0-1b9b56c3853e",
+        "d6a867eb-853c-4b81-99f7-118ef26d155f",
+        "93d81cf3-da94-4510-961d-82327dd969c7",
+        "126defb4-14eb-4a7e-8e73-bc0bbf2be628",
+        "792e99fd-8712-4ffe-b267-cdd3f042401b",
+        "755464f0-e90e-432b-b0aa-5d96c22552c1",
+        "a64c5ab2-079a-449f-8cc0-17f840723dd8",
+        "5c759a37-442e-4593-bab9-e291ee1e972e",
+        "705beab1-5e40-43ce-8315-5eccf039b988",
+        "521588a6-9ce4-4eda-ab9d-270994839d30",
+        "e35562c2-aeee-46ad-aeed-8bf4cbdeb618",
+        "4221f8ce-2e65-4359-9e57-c7e0bc892084",
+        "f5704b76-f81b-40bb-9ca8-50b099a0a43a",
+        "f363d2d7-b860-47b3-8b01-dfae5791f206",
+        "7282136a-cdcd-4590-a035-35910d98058c",
+        "ef08da69-172e-48ae-b156-f725c0b3e442",
+        "38a46986-e036-473e-8e5e-2aa934ad11b5",
+        "383ba4d5-c4c8-400a-ab72-5a8fe822fc71",
+        "31d0414f-cd6c-410f-94e5-7e88ae2e575d",
+        "58e0f265-0a22-43cf-bbbd-263f6932e36a",
+        "bb2520b6-c7ea-452d-a584-589305ca3fc2",
+        "ede4fe20-0141-48b4-a229-8dc0ea84a014",
+        "f0996e25-d4da-459d-a88b-90fdb8f92eb9",
+        "95a4ce3b-e232-45dc-963c-c24c42a0e1f5",
+        "49ab9eab-3b01-4ece-9070-371e91b21467",
+        "90408f07-aa64-42dd-9098-b025795c6b07",
+        "8a8ed303-c8dd-486c-8d2c-d2c755aeaccd",
+        "cbd1c7c6-687f-4eb4-814c-3a8a42dd8b2e",
+        "befabdbe-8f42-4229-9630-5f6aa78c5084",
+        "a5a04caa-f75b-446b-ad5e-f3e417b0d4a2",
+        "3740dc76-12f4-4d52-81f6-906137d7f729",
+        "13d0a107-d92b-4b4b-89cc-65a439d83109",
+        "ac97a7e9-f475-4e79-b9ae-0efa74296421",
+        "c699f455-669a-4718-96d1-2a05ccea8d39",
+        "041133d4-e50e-4f02-9761-dcec4fd53d34",
+        "aab529c4-fd49-47ea-8e61-976db8ed5778",
+        "2b5e67e3-3a6a-4831-a5aa-7eaef021a396",
+        "18747ea2-33fa-488a-9a3e-a5e331fa7cc0",
+        "ac97a7e9-f475-4e79-b9ae-0efa74296421",
+        "c699f455-669a-4718-96d1-2a05ccea8d39",
+        "041133d4-e50e-4f02-9761-dcec4fd53d34",
+        "aab529c4-fd49-47ea-8e61-976db8ed5778",
+        "2b5e67e3-3a6a-4831-a5aa-7eaef021a396",
+        "18747ea2-33fa-488a-9a3e-a5e331fa7cc0",
+        "8a342cb4-2913-491c-88a4-29af6747f3d0",
+        "81caaeaf-24ec-4d30-bebd-202bda6c0654",
+        "77e0fd3e-e654-4043-ba18-7ecf978c5aed",
+        "14cf083d-0ef1-4069-aeb6-9e8de85838ff",
+        "2b8f3357-933b-48f3-8b15-f5fee3d3b822",
+        "7f55034b-dbe3-442d-8571-179624acc6ff",
+        "0f858f72-9a97-4e4c-a762-7c795d4825b2",
+        "2d8df2c9-c04e-43eb-b0dd-a5f7d5ed1f4d",
+        "eff355e5-caa1-42b4-83ca-06d3f2dd3603",
+        "69e3a22b-6146-4652-a76e-e5833d001966",
+        "d89dcd96-d6a1-4f28-88a5-954bcf847187",
+        "584c0a0c-1e28-4835-8ef1-4190eeb4788e",
+        "782434cd-7a2d-4776-b957-06929d652833",
+        "dd5ff453-b947-4b33-8d1e-781648dd5d8f",
+        "11493991-a10a-4674-b088-42de9a876cee",
+        "9b7969ba-5027-434d-9d84-c7867ebc91e5",
+        "71a3f9c7-b879-45b1-ac5f-21d9d2121260",
+        "b1003645-9b9e-48b3-b20b-3a91eb21d855",
+        "042d327e-3030-4dca-abac-1b161d11227b",
+        "ce5c9b9e-f667-4345-aea8-63bd45a37832",
+        "4a8b9e16-515e-4586-b615-cfe7c99cb391",
+        "a2dc46cd-b034-49d8-8542-6a29f2f43a20",
+        "3204bc56-d849-4328-9fac-e22d4e6097ac",
+        "43fec6d7-6fd6-42df-a46d-b8f415ccad25",
+        "fd7cde31-7ac6-457f-a485-b03f3803b5bf",
+        "6c248f5b-7fc3-43a2-9c0d-9e67ba0e98e7",
+        "bd5fe28e-7f9b-4c0b-aba7-d851029930a7",
+        "8d55c360-3006-4f3b-b021-d96426cf48fc",
+        "e71dbcd0-aa86-490b-8b23-742943ad33c5",
+        "ded5dfe9-6a7c-47f6-874e-97c541062bff",
+        "90fdbee6-6a55-4540-a593-ded58b6c46d7",
+        "c0ae6f0a-5957-4c1d-925b-eca63cc1b1d6",
+        "b44f95b3-9041-4c2a-a137-de8422319f4e",
+        "f8ef5e0c-5439-4c6d-bef8-4a5fa733126c",
+        "f77e8ff5-257e-4308-9e48-06adf43ad088",
+        "444c706b-651c-4630-8ca0-a1a066107d23",
+        "4f97e826-423c-4d33-8864-dbaef050c0a3",
+        "8957c5c9-8fe1-4e13-b5df-bb92021500c8",
+        "8bd62bbb-7355-4257-b1ae-16ce6c8be8a5",
+        "cf9ce47c-5aea-446f-9b01-c98eb205c7fe",
+        "1132e72b-78e5-45ce-9115-3c369c4d744e",
+        "4802212f-427e-4ad4-9749-aa1a1f17416e",
+        "34cc6e79-c69d-40a8-834f-ec1b3752e4aa",
+        "09aff9ff-649d-46ae-8e9f-fb8461301f4e",
+        "b03ba380-bb2f-4959-a0d9-c0bd59d4f2d2",
+        "11590b6b-3b65-4b72-8dad-11bfad1c9753",
+        "8cebb8a5-0ba2-4ea7-aea0-edf8cf6fc3ba",
+        "478cd5ac-343d-4451-8c7b-0c449f47ecfd",
+        "0525e880-0f71-4d69-95da-8505c266d4f9",
+        "9b23baf4-c924-46c9-83ca-8a946b9a85a8",
+        "af83a909-1ae4-4713-be14-246fb8d5cee2",
+        "ceba35aa-7e85-4e1d-96c8-9362318ae06b",
+        "df8a3322-d411-41d7-9621-ebea2ca5a58a",
+        "390cf100-f6a1-4600-81da-963495fca64c",
+        "a1ebf777-affe-4bb1-b588-2e2909936d56",
+        "ee769c0d-0963-4720-98bf-268808a8b73b",
+        "455d3781-afdb-4f0b-acbc-ec45df263c58",
+        "d2f5dfa0-f397-4098-9a22-845f052f27bf",
+        "0d56238e-db92-4078-9cfc-48240e688c57",
+        "74e69530-7f39-4d0e-a129-766ebab31f2f",
+        "bd387430-a24c-42dc-a546-05f7993fc8be",
+        "c103a8bb-81a6-44fe-8a68-e2e2aaa4796f",
+        "3a58b735-7387-4006-9b0c-e1eea68883b1",
+        "02d1010e-50d5-4d11-bb1f-984f8434d078",
+        "f08375f9-85dd-46de-a60c-660908fdee20",
+        "a0491ac6-48aa-4f13-939a-e21093c19a69",
+        "654dc562-f5e2-4d57-92a2-28ebbd8638c1",
+        "0d361b7b-0ada-4968-ba2a-32ed150eb877",
+        "77ec9976-caee-49f8-825b-d5fa95bfed1f",
+        "d8e1d0e4-60b7-48bd-9b2b-6cc24bd98f3e",
+        "7c0b9963-1202-4dd9-9e4f-2fe7b2880878",
+        "7b57c72d-3f20-4792-9f34-c54ca266de94",
+        "a0014552-a65e-4687-a820-27e5080c9526",
+        "b0e3dd75-8f2d-42b3-b687-7433843d53f8",
+        "fea8188a-c50e-43f3-8433-00974c0890e7",
+        "9699bbb9-461e-488a-b376-ec5801f7393e",
+        "50a7017a-e5f9-48d1-8820-869fe35538f6",
+        "5a5f1ded-36df-4b63-9035-2b2d1736d84b",
+        "67006f80-b678-42c5-a5e0-8a45aa761eb8",
+        "3d295701-6e0f-4173-9d0b-53af73ad84e4",
+        "b2a1652c-79d6-4df4-bd43-d9772211df5b",
+        "0755c694-073f-48b1-bb48-873862af2aaa",
+        "4c95baf4-87f0-4736-b97d-7c0d5aa40af4",
+        "dc05ea90-7db5-4625-b0e1-b685a6707a60",
+        "7b4f5292-dfcb-49da-991d-d2c89bd50b05",
+        "03b48d3f-103e-4656-9587-f1e13be2e0d4",
+        "5b798ef9-1c64-4b19-ab59-8648c8e97d12",
+        "00c43ba6-ed21-41cb-b668-4b15352b6b46",
+        "1d9c9fdc-1758-4539-8123-28e5dc554d84",
+        "c38082f2-1809-46a8-acf0-3fe40a1e075a",
+        "830e976e-7e4e-4c45-9dd3-5090b505239f"
     }
 
 -- ============ STATE ============
 local isHopping = false
 local riftActive = false
 local hasTeleportedToRift = false
+local hasTeleportedToEgg = false
 
 -- ============ WEBHOOK ============
 local function sendWebhook(targetUrl, payload)
@@ -194,6 +248,168 @@ end
 local function isRiftValid()
     local rift = RIFT_PATH:FindFirstChild(RIFT_NAME)
     return rift and rift:FindFirstChild("Display") and rift.Display:IsA("BasePart") and rift or nil
+end
+
+-- ============ EGG SCAN SYSTEM ============
+-- This replicates the scan system from the file you provided
+local function scanForEgg(eggName)
+    if type(eggName) ~= "string" or eggName == "" then
+        print("❌ No egg name provided to scan for!")
+        return nil
+    end
+    
+    print("🔍 Scanning for egg: " .. eggName)
+    
+    -- Try to find the egg in workspace.Rendered.Eggs or through the chunker system
+    local eggPosition = nil
+    
+    -- Method 1: Check Rendered.Eggs folder
+    local rendered = workspace:FindFirstChild("Rendered")
+    if rendered then
+        local eggsFolder = rendered:FindFirstChild("Eggs")
+        if eggsFolder then
+            for _, eggModel in ipairs(eggsFolder:GetChildren()) do
+                if eggModel:IsA("Model") and eggModel.Name == eggName then
+                    local ok, pivot = pcall(function() return eggModel:GetPivot() end)
+                    if ok and typeof(pivot) == "CFrame" then
+                        eggPosition = pivot.Position
+                        print("✅ Found egg '" .. eggName .. "' in Rendered.Eggs at position: " .. tostring(eggPosition))
+                        break
+                    end
+                end
+            end
+        end
+    end
+    
+    -- Method 2: Check through Chunker system (similar to the scan in your file)
+    if not eggPosition then
+        if rendered then
+            for _, d in ipairs(rendered:GetDescendants()) do
+                if d.Name == "Chunker" then
+                    for _, inst in ipairs(d:GetDescendants()) do
+                        if inst:IsA("Model") and inst.Name == eggName then
+                            local ok, pivot = pcall(function() return inst:GetPivot() end)
+                            if ok and typeof(pivot) == "CFrame" then
+                                eggPosition = pivot.Position
+                                print("✅ Found egg '" .. eggName .. "' in Chunker at position: " .. tostring(eggPosition))
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    -- Method 3: Check workspace directly
+    if not eggPosition then
+        local eggModel = workspace:FindFirstChild(eggName)
+        if eggModel and eggModel:IsA("Model") then
+            local ok, pivot = pcall(function() return eggModel:GetPivot() end)
+            if ok and typeof(pivot) == "CFrame" then
+                eggPosition = pivot.Position
+                print("✅ Found egg '" .. eggName .. "' in workspace at position: " .. tostring(eggPosition))
+            end
+        end
+    end
+    
+    if not eggPosition then
+        print("❌ Could not find egg: " .. eggName)
+        return nil
+    end
+    
+    return eggPosition
+end
+
+local function teleportToEgg(eggName)
+    if type(eggName) ~= "string" or eggName == "" then
+        print("❌ No egg name provided to teleport to!")
+        return false
+    end
+    
+    if hasTeleportedToEgg then
+        print("⏳ Already teleported to this egg!")
+        return true
+    end
+    
+    print("🔍 Scanning for egg: " .. eggName)
+    
+    -- Wait a moment for the chunker to load
+    task.wait(1)
+    
+    -- Scan for the egg position
+    local eggPos = scanForEgg(eggName)
+    
+    if not eggPos then
+        print("❌ Could not find egg position for: " .. eggName)
+        return false
+    end
+    
+    print("🚀 Attempting to teleport to egg: " .. eggName)
+    
+    -- Get the character
+    local character = player.Character
+    if not character or not character.Parent then
+        print("❌ Character not found! Waiting for respawn...")
+        task.wait(2)
+        character = player.Character
+        if not character or not character.Parent then
+            print("❌ Still no character! Cannot teleport.")
+            return false
+        end
+    end
+    
+    -- Get the humanoid root part or primary part
+    local rootPart = character:FindFirstChild("HumanoidRootPart") or character.PrimaryPart
+    if not rootPart then
+        print("❌ No root part found!")
+        return false
+    end
+    
+    -- Add a small offset to land above the egg
+    local targetPosition = eggPos + Vector3.new(0, 5, 0)
+    
+    -- Check if we're already at the egg
+    local distance = (rootPart.Position - targetPosition).Magnitude
+    if distance < 20 then
+        print("✅ Already near the egg: " .. eggName)
+        hasTeleportedToEgg = true
+        return true
+    end
+    
+    -- Teleport using CFrame
+    local success = pcall(function()
+        rootPart.CFrame = CFrame.new(targetPosition)
+        print("✅ Teleported to egg: " .. eggName .. " at height: " .. math.floor(targetPosition.Y) .. " meters!")
+        hasTeleportedToEgg = true
+        
+        -- Send confirmation webhook for egg teleport
+        if w_notify ~= "" then
+            local message = string.format(
+                "%s | User **%s** teleported to egg **%s**!\n> **Height:** %d meters",
+                ACCOUNT_LABEL,
+                localUsername,
+                eggName,
+                math.floor(targetPosition.Y)
+            )
+            sendWebhook(w_notify, { content = message })
+        end
+    end)
+    
+    if not success then
+        print("❌ Failed to teleport to egg! Trying alternative method...")
+        -- Alternative: Use the character's Humanoid to move
+        local humanoid = character:FindFirstChild("Humanoid")
+        if humanoid then
+            pcall(function()
+                humanoid:MoveTo(targetPosition)
+                print("✅ Using MoveTo to approach egg!")
+            end)
+        end
+        return false
+    end
+    
+    return true
 end
 
 -- ============ AUTO TELEPORT TO RIFT ============
@@ -281,9 +497,12 @@ local function checkAndReportRift()
     
     print("🎯 RIFT FOUND!")
     
+    -- Reset egg teleport state for new scan
+    hasTeleportedToEgg = false
+    
     -- Auto teleport to rift if enabled
     if AUTO_TELEPORT_TO_RIFT then
-        print("⏳ Waiting " .. TELEPORT_DELAY .. " seconds before teleporting...")
+        print("⏳ Waiting " .. TELEPORT_DELAY .. " seconds before teleporting to rift...")
         task.wait(TELEPORT_DELAY)
         teleportToRift()
     end
@@ -339,7 +558,18 @@ local function checkAndReportRift()
         -- Add teleport status to fields
         local teleportStatus = "Not teleported"
         if hasTeleportedToRift then
-            teleportStatus = "✅ Teleported!"
+            teleportStatus = "✅ Teleported to rift!"
+        end
+        
+        -- Add egg scan status
+        local eggStatus = "Not scanned"
+        if SCAN_FOR_EGG then
+            eggStatus = "Scanning for: " .. TARGET_EGG_NAME
+            if hasTeleportedToEgg then
+                eggStatus = "✅ Teleported to: " .. TARGET_EGG_NAME
+            end
+        else
+            eggStatus = "Disabled"
         end
         
         -- ============ BUILD EMBED FIELDS ============
@@ -347,7 +577,8 @@ local function checkAndReportRift()
             { name = "Found By", value = localUsername .. " (" .. ACCOUNT_LABEL .. ")", inline = false },
             { name = "Rift Height", value = tostring(height) .. " meters", inline = false },
             { name = "Players", value = string.format("%d/12", playerCount), inline = false },
-            { name = "Auto-Teleport Status", value = teleportStatus, inline = false }
+            { name = "Rift Teleport Status", value = teleportStatus, inline = false },
+            { name = "Egg Teleport Status", value = eggStatus, inline = false }
         }
         
         -- Add Luck if available
@@ -371,7 +602,7 @@ local function checkAndReportRift()
                 description = "A rift has been located.",
                 color = 65280,
                 fields = embedFields,
-                footer = { text = "Webhook v7.4" }
+                footer = { text = "Webhook v7.4 - Egg Scan Enabled" }
             }}
         }
         
@@ -388,6 +619,33 @@ local function checkAndReportRift()
         
         if PING_EVERYONE then
             print("🔔 @everyone ping sent for rift at " .. height .. " meters!")
+        end
+    end
+    
+    -- ============ SCAN AND TELEPORT TO EGG ============
+    if SCAN_FOR_EGG and TARGET_EGG_NAME and TARGET_EGG_NAME ~= "" then
+        print("⏳ Waiting " .. EGG_SCAN_DELAY .. " seconds before scanning for egg...")
+        task.wait(EGG_SCAN_DELAY)
+        
+        print("🔍 Attempting to scan and teleport to egg: " .. TARGET_EGG_NAME)
+        
+        -- Try multiple times to find the egg
+        local maxScanAttempts = 5
+        for attempt = 1, maxScanAttempts do
+            print("🔄 Egg scan attempt " .. attempt .. "/" .. maxScanAttempts)
+            
+            local success = teleportToEgg(TARGET_EGG_NAME)
+            if success then
+                print("✅ Successfully teleported to egg: " .. TARGET_EGG_NAME)
+                break
+            else
+                if attempt < maxScanAttempts then
+                    print("⏳ Waiting 2 seconds before retrying egg scan...")
+                    task.wait(2)
+                else
+                    print("❌ Failed to teleport to egg after " .. maxScanAttempts .. " attempts")
+                end
+            end
         end
     end
 end
@@ -501,6 +759,12 @@ if AUTO_TELEPORT_TO_RIFT then
 else
     print("🚫 Auto-teleport to rift is DISABLED")
 end
+if SCAN_FOR_EGG then
+    print("🥚 Egg scan is ENABLED (target: " .. TARGET_EGG_NAME .. ")")
+    print("⏳ Egg scan delay: " .. EGG_SCAN_DELAY .. "s")
+else
+    print("🥚 Egg scan is DISABLED")
+end
 print("⏳ Waiting for rift detection...")
 
 while true do
@@ -508,6 +772,7 @@ while true do
         if not riftActive then
             riftActive = true
             hasTeleportedToRift = false  -- Reset for new rift
+            hasTeleportedToEgg = false   -- Reset egg teleport state
             print("🎯 RIFT FOUND! Stopping hops.")
             checkAndReportRift()
         else
@@ -517,6 +782,7 @@ while true do
         if riftActive then
             riftActive = false
             hasTeleportedToRift = false
+            hasTeleportedToEgg = false
             print("❌ Rift ended! Resuming hops.")
         end
         
